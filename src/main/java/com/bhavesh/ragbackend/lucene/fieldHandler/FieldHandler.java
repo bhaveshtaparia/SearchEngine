@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface FieldHandler {
 
+    boolean supports(String type);
+
     List<IndexableField> createFields(
             String fieldName,
             DynamicField dynamicField

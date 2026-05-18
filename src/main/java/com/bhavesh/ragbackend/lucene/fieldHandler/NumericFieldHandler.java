@@ -9,13 +9,19 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 @Component
 public class NumericFieldHandler implements FieldHandler {
 
     private static final Logger log = LoggerFactory.getLogger(NumericFieldHandler.class);
+    private static final Set<String> SUPPORTED = Set.of("integer", "long", "float", "double");
 
+    @Override
+    public boolean supports(String type) {
+        return SUPPORTED.contains(type);
+    }
     @Override
     public List<IndexableField> createFields(String fieldName, DynamicField dynamicField) {
 
