@@ -19,9 +19,11 @@ public class TestController {
     public String test() throws Exception {
 
         writerManager.getWriter(
-                "finance",
-                "invoices"
+                "finance1",
+                "invoices1"
         );
+
+        writerManager.closeWriter("finance1", "invoices1");
 
         return "Writer Created";
     }
