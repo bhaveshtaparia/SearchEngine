@@ -18,6 +18,14 @@
 
 ## Lucene Concepts Used in the Project
 
+Let’s understand some concepts → you can connect the things easily.
+
+   1. Analyzer → Just understand data in simple term → books have para, para have sentence , sentence have words. So analyzer splits the sentence in to words (tokenization), make it lowercase (case insensitive search work), remove stop word (like the, is). So analyzer is required to simply that data. → so lucene have multiple analyzer –and we are going to use Standard analyzer in this project.
+   2. FSDirectory → So lucene store index data in file format (generally in disk) → so there is 2 implementation MMapDirectory , NIOFDirectory → used to help on reading fast, Internally use FSIndexOutput for writing .
+   3. Codec → How to encode and decode file during writing or reading from disk. Define index storage format.
+   4. Lucene Document Model → so in lucene we have document → which contain Fields. (later lucene if required convert field value in terms). So Fields is an important concept → there are different types of fields supported , if you need an analyzer in string use TextField, if you want to sort the number , then docsValuesexists. So in simple words lucene store the document.
+   5. Imp concept → lucene create immutable segment from provided docs, for keyword search lucene use inverted index, posting list and many more files , which help to design the effective search algo. (lucene is read heavy storage engine – means give priority to read – based on that its design its algo)
+   6. IndexWriter → Manage segments, apply segments merge , analyzer, codec....
 
 
 ---
@@ -26,6 +34,47 @@
 ## Architecture of the Project
 
 
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    HTTP Layer                           │
+│   IndexingController  ←  POST /api/v1/index            │
+│   TestController      ←  GET  /test  (dev only)        │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│                  Service Layer                          │
+│   IndexingService                                       │
+│   • orchestrates: build → getWriter → upsert → commit  │
+└──────────┬─────────────────────────┬────────────────────┘
+           │                         │
+┌──────────▼──────────┐   ┌──────────▼──────────────────┐
+│   Document Layer    │   │   Index Writer Layer        │
+│   DocumentBuilder   │   │   IndexWriterManager        │
+│   LuceneFieldMapper │   │   • ConcurrentHashMap cache │
+│                     │   │   • one writer per index    │
+│  ┌──────────────┐   │   │   • @PreDestroy shutdown    │
+│  │FieldHandler  │   │   └─────────────────────────────┘
+│  │  (Strategy)  │   │
+│  ├──────────────┤   │
+│  │ StringField  │   │
+│  │ Handler      │   │
+│  ├──────────────┤   │
+│  │ NumericField │   │
+│  │ Handler      │   │
+│  └──────────────┘   │
+└─────────────────────┘
+           │
+┌──────────▼──────────────────────────────────────────────┐
+│                 Apache Lucene Core                      │
+│   FSDirectory → IndexWriter → Document → Segments       │
+└─────────────────────────────────────────────────────────┘
+           │
+┌──────────▼──────────────────────────────────────────────┐
+│                    Filesystem                          │
+│   indexes/{folderId}/{indexId}/   (Lucene segments)    │
+└─────────────────────────────────────────────────────────┘
+```
 
 
 
