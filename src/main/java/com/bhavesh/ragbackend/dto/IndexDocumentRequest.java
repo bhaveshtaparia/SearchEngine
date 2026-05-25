@@ -6,11 +6,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class DynamicIndexDocumentRequest {
-
-    private String folderId;
-
-    private String indexId;
+public class IndexDocumentRequest {
 
     private String documentId;
 

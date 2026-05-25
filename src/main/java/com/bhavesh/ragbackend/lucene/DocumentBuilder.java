@@ -1,7 +1,8 @@
 package com.bhavesh.ragbackend.lucene;
 
+import com.bhavesh.ragbackend.dto.BulkIndexRequest;
 import com.bhavesh.ragbackend.dto.DynamicField;
-import com.bhavesh.ragbackend.dto.DynamicIndexDocumentRequest;
+import com.bhavesh.ragbackend.dto.IndexDocumentRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -22,9 +23,11 @@ public class DocumentBuilder {
 
     private final LuceneFieldMapper luceneFieldMapper;
 
-    public Document build(DynamicIndexDocumentRequest request) {
+    public Document build(IndexDocumentRequest request) {
 
-        validate(request);
+        if(request.getDocumentId()==null || request.getDocumentId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Document ID cannot be empty");
+        }
 
         Document document = new Document();
 
@@ -56,26 +59,13 @@ public class DocumentBuilder {
         return document;
     }
 
-    private void validate(DynamicIndexDocumentRequest request) {
+    public List<Document> buildBulkDocument(BulkIndexRequest request) {
 
-        if (request == null) {
-            throw new IllegalArgumentException("Index request cannot be null");
-        }
+        List<Document> documents = request.getDocuments().stream()
+                .map(this::build)
+                .toList();
 
-        if (isBlank(request.getFolderId())) {
-            throw new IllegalArgumentException("folderId cannot be blank");
-        }
-
-        if (isBlank(request.getIndexId())) {
-            throw new IllegalArgumentException("indexId cannot be blank");
-        }
-
-        if (isBlank(request.getDocumentId())) {
-            throw new IllegalArgumentException("documentId cannot be blank");
-        }
+        return documents;
     }
 
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
 }

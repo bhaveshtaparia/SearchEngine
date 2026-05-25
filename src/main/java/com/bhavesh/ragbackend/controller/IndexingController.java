@@ -1,27 +1,44 @@
 package com.bhavesh.ragbackend.controller;
 
-import com.bhavesh.ragbackend.dto.DynamicIndexDocumentRequest;
+import com.bhavesh.ragbackend.dto.BulkIndexRequest;
+import com.bhavesh.ragbackend.dto.IndexDocumentRequest;
 import com.bhavesh.ragbackend.service.IndexingService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/index")
+@RequestMapping("/api/v1/folders/{folderId}/indexes/{indexId}")
 @RequiredArgsConstructor
 public class IndexingController {
 
-    private static final Logger log = LoggerFactory.getLogger(IndexingController.class);
-
     private final IndexingService indexingService;
 
-    @PostMapping
-    public ResponseEntity<String> index(@RequestBody DynamicIndexDocumentRequest request) {
+    @PostMapping("/documents")
+    public ResponseEntity<String> index(
+            @PathVariable String folderId,
+            @PathVariable String indexId,
+            @RequestBody IndexDocumentRequest request
+    ) {
 
-        indexingService.index(request);
+        indexingService.index(folderId, indexId, request);
 
         return ResponseEntity.ok("Document indexed successfully");
+    }
+
+    @PostMapping("/documents/bulk")
+    public ResponseEntity<String> bulkIndex(
+            @PathVariable String folderId,
+            @PathVariable String indexId,
+            @RequestBody BulkIndexRequest request
+    ) {
+
+        indexingService.bulkIndex(
+                folderId,
+                indexId,
+                request
+        );
+
+        return ResponseEntity.ok("Documents indexed successfully");
     }
 }
