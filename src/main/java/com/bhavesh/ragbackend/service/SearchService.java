@@ -6,11 +6,13 @@ import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
 import lombok.RequiredArgsConstructor;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -29,6 +31,7 @@ import java.util.*;
 public class SearchService {
 
     private final LuceneProperties luceneProperties;
+    private final Analyzer analyzer;
 
     public SearchResponse search(String folderId, String indexId, SearchRequest request) {
 
@@ -44,13 +47,8 @@ public class SearchService {
 
             IndexSearcher searcher = new IndexSearcher(reader);
 
-            /*
-             IMPORTANT:
-             content = field name you want to search
-
-             Change this later dynamically.
-            */
-            Query query = new TermQuery(new Term("content", request.getQuery().toLowerCase()));
+            QueryParser queryParser = new QueryParser("content", analyzer);
+            Query query = queryParser.parse(request.getQuery());
 
             TopDocs topDocs = searcher.search(query, 10);
 
@@ -101,6 +99,9 @@ public class SearchService {
         } catch (IOException e) {
 
             throw new LuceneIndexException("Failed to search index", e);
+        } catch (Exception e) {
+
+            throw new LuceneIndexException("Search query parsing failed", e);
         }
     }
 
