@@ -2,6 +2,7 @@ package com.bhavesh.ragbackend.lucene;
 
 import com.bhavesh.ragbackend.config.LuceneProperties;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.utils.FieldUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -37,7 +38,7 @@ public class IndexWriterManager {
 
     public IndexWriter getWriter(String folderId, String indexId) {
 
-        String key = buildKey(folderId, indexId);
+        String key = FieldUtils.buildKey(folderId, indexId);
 
         return writerCache.compute(key, (k, existingWriter) -> {
 
@@ -57,7 +58,7 @@ public class IndexWriterManager {
 
     public void commit(String folderId, String indexId) {
 
-        String key = buildKey(folderId, indexId);
+        String key = FieldUtils.buildKey(folderId, indexId);
         IndexWriter writer = writerCache.get(key);
 
         if (writer == null || !writer.isOpen()) {
@@ -77,7 +78,7 @@ public class IndexWriterManager {
 
     public void closeWriter(String folderId, String indexId) {
 
-        String key = buildKey(folderId, indexId);
+        String key = FieldUtils.buildKey(folderId, indexId);
         IndexWriter writer = writerCache.remove(key);
 
         if (writer != null) {
@@ -101,7 +102,7 @@ public class IndexWriterManager {
     private IndexWriter createWriter(String folderId, String indexId) {
 
         try {
-            Path indexPath = resolvePath(folderId, indexId);
+            Path indexPath = FieldUtils.resolvePath(properties, folderId, indexId);
             Files.createDirectories(indexPath);
 
             FSDirectory directory = FSDirectory.open(indexPath);
@@ -157,24 +158,5 @@ public class IndexWriterManager {
                 log.error("Failed to close writer: {}", key, e);
             }
         }
-    }
-
-    private Path resolvePath(String folderId, String indexId) {
-        return Paths.get(
-                properties.getBasePath(),
-                sanitize(folderId),
-                sanitize(indexId)
-        );
-    }
-
-    private String sanitize(String input) {
-        if (input == null || input.isBlank()) {
-            throw new IllegalArgumentException("folderId/indexId must not be blank");
-        }
-        return input.replaceAll("[^a-zA-Z0-9-_]", "_");
-    }
-
-    private String buildKey(String folderId, String indexId) {
-        return folderId + ":" + indexId;
     }
 }

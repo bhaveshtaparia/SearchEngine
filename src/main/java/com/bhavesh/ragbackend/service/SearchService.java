@@ -5,6 +5,7 @@ import com.bhavesh.ragbackend.dto.SearchHit;
 import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.utils.FieldUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -37,7 +38,7 @@ public class SearchService {
 
         validateRequest(folderId, indexId, request);
 
-        Path indexPath = buildIndexPath(folderId, indexId);
+        Path indexPath = FieldUtils.resolvePath(luceneProperties,folderId, indexId);
 
         if (!Files.exists(indexPath)) {
             throw new LuceneIndexException("Index does not exist: " + indexPath);
@@ -111,31 +112,16 @@ public class SearchService {
             throw new IllegalArgumentException("Request cannot be null");
         }
 
-        if (isBlank(folderId)) {
+        if (FieldUtils.isBlank(folderId)) {
             throw new IllegalArgumentException("folderId cannot be blank");
         }
 
-        if (isBlank(indexId)) {
+        if (FieldUtils.isBlank(indexId)) {
             throw new IllegalArgumentException("indexId cannot be blank");
         }
 
-        if (isBlank(request.getQuery())) {
+        if (FieldUtils.isBlank(request.getQuery())) {
             throw new IllegalArgumentException("query cannot be blank");
         }
-    }
-
-    private Path buildIndexPath(String folderId, String indexId) {
-
-        return Path.of(luceneProperties.getBasePath(), sanitize(folderId), sanitize(indexId));
-    }
-
-    private String sanitize(String value) {
-
-        return value.replaceAll("[^a-zA-Z0-9-_]", "_");
-    }
-
-    private boolean isBlank(String value) {
-
-        return value == null || value.trim().isEmpty();
     }
 }

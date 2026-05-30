@@ -5,6 +5,7 @@ import com.bhavesh.ragbackend.dto.IndexDocumentRequest;
 import com.bhavesh.ragbackend.lucene.DocumentBuilder;
 import com.bhavesh.ragbackend.lucene.IndexWriterManager;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.utils.FieldUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
@@ -76,18 +77,12 @@ public class IndexingService {
             throw new IllegalArgumentException("Index request cannot be null");
         }
 
-        if (isBlank(folderId)) {
+        if (FieldUtils.isBlank(folderId)) {
             throw new IllegalArgumentException("folderId cannot be blank");
         }
 
-        if (isBlank(indexId)) {
+        if (FieldUtils.isBlank(indexId)) {
             throw new IllegalArgumentException("indexId cannot be blank");
         }
     }
-
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
-
 }
