@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Pattern(
         regexp = "^[a-zA-Z0-9_]+$",
-        message = "must contain only letters, digits, or underscores"
+        message = "parameter must contain only letters, digits, or underscores"
 )
 public @interface ValidId {
     String message() default "must contain only letters, digits, or underscores";

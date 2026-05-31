@@ -2,6 +2,8 @@ package com.bhavesh.ragbackend.lucene.exception;
 
 import com.bhavesh.ragbackend.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -47,12 +49,39 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        String message = ex.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(ConstraintViolation::getMessage)
+                .orElse("Invalid request parameter");
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request.getRequestURI());
+    }
+
     @ExceptionHandler(LuceneIndexException.class)
     public ResponseEntity<ErrorResponse> handleLuceneIndexException(
             LuceneIndexException ex,
             HttpServletRequest request) {
 
-        log.error("Lucene indexing failed", ex);
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(LuceneGeneralException.class)
+    public ResponseEntity<ErrorResponse> handleLuceneGeneralException(
+            LuceneGeneralException ex,
+            HttpServletRequest request) {
+
 
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -81,7 +110,6 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(Instant.now())
                 .status(status.value())
-                .error(status.getReasonPhrase())
                 .message(message)
                 .path(path)
                 .build();
