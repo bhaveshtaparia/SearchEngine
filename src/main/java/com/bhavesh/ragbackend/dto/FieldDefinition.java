@@ -10,6 +10,9 @@ public class FieldDefinition {
     @NotNull(message = "Field type must not be null")
     private FieldUtils.FieldType type;
 
+
+    private Boolean primaryKey = false;
+
     /*
         default true
     */
@@ -30,4 +33,8 @@ public class FieldDefinition {
         default true
     */
     private Boolean analyzed = true;
+
+    public boolean isPrimaryKey() {
+        return  primaryKey;
+    }
 }

@@ -16,6 +16,8 @@ public class FieldUtils {
         BOOLEAN
     }
 
+    public static String LUCENE_PRIMARY_KEY_FIELD = "_documentId";
+
     public static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
