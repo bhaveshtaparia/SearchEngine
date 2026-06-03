@@ -2,7 +2,7 @@ package com.bhavesh.ragbackend.lucene;
 
 import com.bhavesh.ragbackend.config.LuceneProperties;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
-import com.bhavesh.ragbackend.utils.FieldUtils;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -15,7 +15,6 @@ import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +37,7 @@ public class IndexWriterManager {
 
     public IndexWriter getWriter(String folderId, String indexId) {
 
-        String key = FieldUtils.buildKey(folderId, indexId);
+        String key = LuceneUtils.buildKey(folderId, indexId);
 
         return writerCache.compute(key, (k, existingWriter) -> {
 
@@ -58,7 +57,7 @@ public class IndexWriterManager {
 
     public void commit(String folderId, String indexId) {
 
-        String key = FieldUtils.buildKey(folderId, indexId);
+        String key = LuceneUtils.buildKey(folderId, indexId);
         IndexWriter writer = writerCache.get(key);
 
         if (writer == null || !writer.isOpen()) {
@@ -78,7 +77,7 @@ public class IndexWriterManager {
 
     public void closeWriter(String folderId, String indexId) {
 
-        String key = FieldUtils.buildKey(folderId, indexId);
+        String key = LuceneUtils.buildKey(folderId, indexId);
         IndexWriter writer = writerCache.remove(key);
 
         if (writer != null) {
@@ -102,7 +101,7 @@ public class IndexWriterManager {
     private IndexWriter createWriter(String folderId, String indexId) {
 
         try {
-            Path indexPath = FieldUtils.resolvePath(properties, folderId, indexId);
+            Path indexPath = LuceneUtils.resolvePath(properties, folderId, indexId);
             Files.createDirectories(indexPath);
 
             FSDirectory directory = FSDirectory.open(indexPath);

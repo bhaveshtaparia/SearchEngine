@@ -2,7 +2,6 @@ package com.bhavesh.ragbackend.store;
 
 import com.bhavesh.ragbackend.dto.FieldDefinition;
 import com.bhavesh.ragbackend.lucene.exception.SchemaException;
-import com.bhavesh.ragbackend.utils.FieldUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +25,7 @@ public class FileSchemaStore implements SchemaStore {
     @Override
     public void save(String folderId, String indexId, Map<String, FieldDefinition> schema) {
         try {
-            validatePrimaryKeyField(schema);
-            validateSchemaFieldNames(schema);
-            if(exists(folderId, indexId)) {
-                log.warn("Schema already exits for folderId={}, indexId={}", folderId, indexId);
-                throw new SchemaException("Schema already exists for folderId=" + folderId + " and indexId=" + indexId);
-            }
+
             Path folder = resolveFolder(folderId);
 
             if (!Files.exists(folder)) {
@@ -41,10 +35,6 @@ public class FileSchemaStore implements SchemaStore {
             objectMapper.writerWithDefaultPrettyPrinter()
                     .writeValue(resolveSchemaFile(folderId, indexId).toFile(), schema);
 
-        }
-        catch (SchemaException e) {
-            log.error("Schema error for folderId={}, indexId={}: {}", folderId, indexId, e.getMessage());
-            throw e;
         }
         catch (Exception e) {
             log.error("Error saving schema for folderId={}, indexId={}", folderId, indexId, e);
@@ -87,28 +77,4 @@ public class FileSchemaStore implements SchemaStore {
         return resolveFolder(folderId).resolve(indexId + "-schema.json");
     }
 
-    private void validatePrimaryKeyField(Map<String, FieldDefinition> schema) {
-        String primaryKeyField = null;
-        for (var entry : schema.entrySet()) {
-            if (entry.getValue().isPrimaryKey()) {
-                if (primaryKeyField != null) {
-                    throw new SchemaException("Multiple primary key fields defined, There should be only one primary key field in the schema");
-                }
-                primaryKeyField = entry.getKey();
-            }
-        }
-        if (primaryKeyField == null) {
-            throw new SchemaException("No primary key field defined, There should be one primary key field in the schema");
-        }
-    }
-    private void validateSchemaFieldNames(Map<String, FieldDefinition> schema) {
-        for (String fieldName : schema.keySet()) {
-            if (!fieldName.matches("^[a-zA-Z0-9_-]+$")) {
-                throw new SchemaException("Invalid field name: " + fieldName + ". Field names can only contain letters, numbers, underscores, and hyphens.");
-            }
-            if(FieldUtils.LUCENE_PRIMARY_KEY_FIELD.equals(fieldName.trim())) {
-                throw new SchemaException("Field name " + FieldUtils.LUCENE_PRIMARY_KEY_FIELD + " is reserved for internal use and cannot be used in schema definition");
-            }
-        }
-    }
 }

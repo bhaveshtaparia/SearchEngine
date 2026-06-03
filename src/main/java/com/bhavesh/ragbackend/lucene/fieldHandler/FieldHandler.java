@@ -1,16 +1,16 @@
 package com.bhavesh.ragbackend.lucene.fieldHandler;
 
-import com.bhavesh.ragbackend.dto.DynamicField;
+import com.bhavesh.ragbackend.model.IndexField;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.index.IndexableField;
 
 import java.util.List;
 
 public interface FieldHandler {
 
-    boolean supports(String type);
+    boolean supports(LuceneUtils.FieldType type);
 
     List<IndexableField> createFields(
-            String fieldName,
-            DynamicField dynamicField
+            IndexField indexField
     );
 }

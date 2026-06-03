@@ -1,6 +1,6 @@
 package com.bhavesh.ragbackend.dto;
 
-import com.bhavesh.ragbackend.utils.FieldUtils;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
 public class FieldDefinition {
 
     @NotNull(message = "Field type must not be null")
-    private FieldUtils.FieldType type;
+    private LuceneUtils.FieldType type;
 
 
     private Boolean primaryKey = false;

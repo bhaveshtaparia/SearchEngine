@@ -5,19 +5,17 @@ import com.bhavesh.ragbackend.dto.SearchHit;
 import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
-import com.bhavesh.ragbackend.utils.FieldUtils;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.springframework.stereotype.Service;
@@ -38,7 +36,7 @@ public class SearchService {
 
         validateRequest(folderId, indexId, request);
 
-        Path indexPath = FieldUtils.resolvePath(luceneProperties,folderId, indexId);
+        Path indexPath = LuceneUtils.resolvePath(luceneProperties,folderId, indexId);
 
         if (!Files.exists(indexPath)) {
             throw new LuceneIndexException("Index does not exist: " + indexPath);
@@ -112,15 +110,15 @@ public class SearchService {
             throw new IllegalArgumentException("Request cannot be null");
         }
 
-        if (FieldUtils.isBlank(folderId)) {
+        if (LuceneUtils.isBlank(folderId)) {
             throw new IllegalArgumentException("folderId cannot be blank");
         }
 
-        if (FieldUtils.isBlank(indexId)) {
+        if (LuceneUtils.isBlank(indexId)) {
             throw new IllegalArgumentException("indexId cannot be blank");
         }
 
-        if (FieldUtils.isBlank(request.getQuery())) {
+        if (LuceneUtils.isBlank(request.getQuery())) {
             throw new IllegalArgumentException("query cannot be blank");
         }
     }

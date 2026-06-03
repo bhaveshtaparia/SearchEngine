@@ -4,8 +4,9 @@ import com.bhavesh.ragbackend.config.LuceneProperties;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
-public class FieldUtils {
+public class LuceneUtils {
 
     public static enum FieldType {
         STRING,
@@ -34,9 +35,13 @@ public class FieldUtils {
     public static Path resolvePath(LuceneProperties properties, String folderId, String indexId) {
         return Paths.get(
                 properties.getBasePath(),
-                FieldUtils.sanitize(folderId),
-                FieldUtils.sanitize(indexId)
+                sanitize(folderId),
+                sanitize(indexId)
         );
+    }
+
+    public static Object getPrimaryKeyFieldValue(Map<String, Object> document) {
+        return  null;
     }
 
 

@@ -1,6 +1,7 @@
 package com.bhavesh.ragbackend.lucene.fieldHandler;
 
-import com.bhavesh.ragbackend.dto.DynamicField;
+import com.bhavesh.ragbackend.model.IndexField;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
 import org.slf4j.Logger;
@@ -16,23 +17,25 @@ public class StringFieldHandler implements FieldHandler {
 
     private static final Logger log = LoggerFactory.getLogger(StringFieldHandler.class);
 
-    private static final Set<String> SUPPORTED = Set.of("string", "boolean");
+    private static final Set<LuceneUtils.FieldType> SUPPORTED = Set.of(LuceneUtils.FieldType.STRING, LuceneUtils.FieldType.BOOLEAN);
 
     @Override
-    public boolean supports(String type) {
+    public boolean supports(LuceneUtils.FieldType type) {
         return SUPPORTED.contains(type);
     }
 
     @Override
-    public List<IndexableField> createFields(String fieldName, DynamicField dynamicField) {
+    public List<IndexableField> createFields(IndexField indexField) {
 
-        Object rawValue = dynamicField.getValue();
+        String fieldName = indexField.getFieldName();
 
-        boolean searchable = dynamicField.getSearchable();
+        Object rawValue = indexField.getValue();
 
-        boolean stored = dynamicField.getStored();
+        boolean searchable = indexField.getSearchable();
 
-        boolean analyzed = dynamicField.getAnalyzed();
+        boolean stored = indexField.getStored();
+
+        boolean analyzed = indexField.getAnalyzed();
 
         validateValue(fieldName, rawValue);
         warnIfNoOp(fieldName, searchable, stored);

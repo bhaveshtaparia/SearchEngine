@@ -1,6 +1,7 @@
 package com.bhavesh.ragbackend.lucene.fieldHandler;
 
-import com.bhavesh.ragbackend.dto.DynamicField;
+import com.bhavesh.ragbackend.model.IndexField;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
 import org.slf4j.Logger;
@@ -16,24 +17,26 @@ import java.util.function.Function;
 public class NumericFieldHandler implements FieldHandler {
 
     private static final Logger log = LoggerFactory.getLogger(NumericFieldHandler.class);
-    private static final Set<String> SUPPORTED = Set.of("integer", "long", "float", "double");
+    private static final Set<LuceneUtils.FieldType> SUPPORTED = Set.of(LuceneUtils.FieldType.INTEGER, LuceneUtils.FieldType.LONG, LuceneUtils.FieldType.FLOAT, LuceneUtils.FieldType.DOUBLE);
 
     @Override
-    public boolean supports(String type) {
+    public boolean supports(LuceneUtils.FieldType type) {
         return SUPPORTED.contains(type);
     }
     @Override
-    public List<IndexableField> createFields(String fieldName, DynamicField dynamicField) {
+    public List<IndexableField> createFields(IndexField indexField) {
 
-        String type = dynamicField.getType().toLowerCase();
+        LuceneUtils.FieldType type = indexField.getType();
 
-        Object value = dynamicField.getValue();
+        Object value = indexField.getValue();
 
-        boolean searchable = dynamicField.getSearchable();
+        String fieldName = indexField.getFieldName();
 
-        boolean stored = dynamicField.getStored();
+        boolean searchable = indexField.getSearchable();
 
-        boolean sortable = dynamicField.getSortable();
+        boolean stored = indexField.getStored();
+
+        boolean sortable = indexField.getSortable();
 
         validateValue(fieldName, value);
         warnIfNoOp(fieldName, searchable, stored, sortable);
@@ -42,7 +45,7 @@ public class NumericFieldHandler implements FieldHandler {
 
         switch (type) {
 
-            case "integer":
+            case LuceneUtils.FieldType.INTEGER:
 
                 int intValue = ((Number) value).intValue();
 
@@ -50,7 +53,7 @@ public class NumericFieldHandler implements FieldHandler {
 
                 break;
 
-            case "long":
+            case LuceneUtils.FieldType.LONG:
 
                 long longValue = ((Number) value).longValue();
 
@@ -58,7 +61,7 @@ public class NumericFieldHandler implements FieldHandler {
 
                 break;
 
-            case "float":
+            case LuceneUtils.FieldType.FLOAT:
 
                 float floatValue = ((Number) value).floatValue();
 
@@ -68,7 +71,7 @@ public class NumericFieldHandler implements FieldHandler {
 
                 break;
 
-            case "double":
+            case LuceneUtils.FieldType.DOUBLE:
 
                 double doubleValue = ((Number) value).doubleValue();
 

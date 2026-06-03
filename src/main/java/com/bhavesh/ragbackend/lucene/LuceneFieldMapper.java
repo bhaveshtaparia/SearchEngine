@@ -1,7 +1,9 @@
 package com.bhavesh.ragbackend.lucene;
 
-import com.bhavesh.ragbackend.dto.DynamicField;
+import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.model.IndexField;
 import com.bhavesh.ragbackend.lucene.fieldHandler.FieldHandler;
+import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.index.IndexableField;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +19,13 @@ public class LuceneFieldMapper {
         this.handlers = handlers;
     }
 
-    public List<IndexableField> mapField(String fieldName, DynamicField dynamicField) {
-        String type = dynamicField.getType().toLowerCase();
+    public List<IndexableField> mapField(IndexField indexField) {
+        LuceneUtils.FieldType type = indexField.getType();
 
         return handlers.stream()
                 .filter(h -> h.supports(type))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported field type: " + type))
-                .createFields(fieldName, dynamicField);
+                .orElseThrow(() -> new LuceneIndexException("Unsupported field type: " + type))
+                .createFields(indexField);
     }
 }
