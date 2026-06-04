@@ -45,9 +45,12 @@ public class IndexingService {
         Map<String, List<IndexField>> primaryKeyVsIndexFields = new HashMap<>();
         Map<String, Object> fields = request.getFields();
         Map<String, FieldDefinition> fieldsSchema = schemaService.getSchema(folderId, indexId);
-        String primaryKeyValue = null;
+        if(fieldsSchema== null) {
+            log.warn("Schema not found for folderId={}, indexId={}", folderId, indexId);
+            throw new LuceneIndexException("Schema not found for folderId=" + folderId + " and indexId=" + indexId);
+        }
         List<IndexField> indexFields = new ArrayList<>();
-        primaryKeyValue = getIndexField(fields, fieldsSchema, indexFields);
+        String primaryKeyValue = getIndexField(fields, fieldsSchema, indexFields);
         primaryKeyVsIndexFields.put(primaryKeyValue, indexFields);
         return primaryKeyVsIndexFields;
     }
@@ -55,6 +58,10 @@ public class IndexingService {
     private Map<String, List<IndexField>> getFields(String folderId, String indexId, BulkIndexRequest request) {
         Map<String, List<IndexField>> primaryKeyVsIndexFields = new HashMap<>();
         Map<String, FieldDefinition> fieldsSchema = schemaService.getSchema(folderId, indexId);
+        if(fieldsSchema== null) {
+            log.warn("Schema not found for folderId={}, indexId={}", folderId, indexId);
+            throw new LuceneIndexException("Schema not found for folderId=" + folderId + " and indexId=" + indexId);
+        }
         for(IndexDocumentRequest documentRequest : request.getDocuments()) {
             Map<String, Object> fields = documentRequest.getFields();
             String primaryKeyValue = null;
@@ -82,7 +89,7 @@ public class IndexingService {
                 if (primaryKeyValue != null) {
                     throw new LuceneIndexException("Multiple primary key values found in document fields, there should be only one primary key field in the schema");
                 }
-                primaryKeyValue = (String) indexField.getValue();
+                primaryKeyValue = indexField.getValue().toString();
             }
         }
         return primaryKeyValue;
