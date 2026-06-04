@@ -77,20 +77,19 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
-    @ExceptionHandler(LuceneGeneralException.class)
-    public ResponseEntity<ErrorResponse> handleLuceneGeneralException(
-            LuceneGeneralException ex,
+    @ExceptionHandler(SchemaException.class)
+    public ResponseEntity<ErrorResponse> handleSchemaException(
+            SchemaException ex,
             HttpServletRequest request) {
 
-
         return buildErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.BAD_REQUEST,
                 ex.getMessage(),
                 request.getRequestURI());
     }
 
-    @ExceptionHandler(SchemaException.class)
-    public ResponseEntity<ErrorResponse> handleSchemaException(
+    @ExceptionHandler(LuceneSearchException.class)
+    public ResponseEntity<ErrorResponse> handleSearchException(
             SchemaException ex,
             HttpServletRequest request) {
 

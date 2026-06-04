@@ -5,8 +5,10 @@ import com.bhavesh.ragbackend.dto.SearchHit;
 import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
 import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.lucene.exception.LuceneSearchException;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -25,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchService {
@@ -33,8 +36,6 @@ public class SearchService {
     private final Analyzer analyzer;
 
     public SearchResponse search(String folderId, String indexId, SearchRequest request) {
-
-        validateRequest(folderId, indexId, request);
 
         Path indexPath = LuceneUtils.resolvePath(luceneProperties,folderId, indexId);
 
@@ -96,30 +97,11 @@ public class SearchService {
             return response;
 
         } catch (IOException e) {
-
-            throw new LuceneIndexException("Failed to search index", e);
+            log.error("Failed to search index at path: {}", indexPath, e);
+            throw new LuceneSearchException("Failed to search index");
         } catch (Exception e) {
-
-            throw new LuceneIndexException("Search query parsing failed", e);
-        }
-    }
-
-    private void validateRequest(String folderId, String indexId, SearchRequest request) {
-
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-
-        if (LuceneUtils.isBlank(folderId)) {
-            throw new IllegalArgumentException("folderId cannot be blank");
-        }
-
-        if (LuceneUtils.isBlank(indexId)) {
-            throw new IllegalArgumentException("indexId cannot be blank");
-        }
-
-        if (LuceneUtils.isBlank(request.getQuery())) {
-            throw new IllegalArgumentException("query cannot be blank");
+            log.error("Search query parsing failed for query: {}", request.getQuery(), e);
+            throw new LuceneSearchException("Search query parsing failed");
         }
     }
 }
