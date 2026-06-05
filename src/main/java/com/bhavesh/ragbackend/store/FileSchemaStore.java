@@ -1,7 +1,7 @@
 package com.bhavesh.ragbackend.store;
 
 import com.bhavesh.ragbackend.dto.FieldDefinition;
-import com.bhavesh.ragbackend.lucene.exception.SchemaException;
+import com.bhavesh.ragbackend.exception.SchemaException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

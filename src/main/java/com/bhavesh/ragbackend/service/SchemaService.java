@@ -2,7 +2,7 @@ package com.bhavesh.ragbackend.service;
 
 import com.bhavesh.ragbackend.dto.FieldDefinition;
 import com.bhavesh.ragbackend.dto.RegisterSchemaRequest;
-import com.bhavesh.ragbackend.lucene.exception.SchemaException;
+import com.bhavesh.ragbackend.exception.SchemaException;
 import com.bhavesh.ragbackend.store.SchemaStore;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.AllArgsConstructor;

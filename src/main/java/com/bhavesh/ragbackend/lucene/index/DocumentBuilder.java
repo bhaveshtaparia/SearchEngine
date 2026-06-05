@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.lucene;
+package com.bhavesh.ragbackend.lucene.index;
 
 import com.bhavesh.ragbackend.model.IndexField;
 import com.bhavesh.ragbackend.utils.LuceneUtils;

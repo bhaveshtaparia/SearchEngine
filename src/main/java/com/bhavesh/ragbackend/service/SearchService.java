@@ -4,11 +4,9 @@ import com.bhavesh.ragbackend.config.LuceneProperties;
 import com.bhavesh.ragbackend.dto.SearchHit;
 import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
-import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
-import com.bhavesh.ragbackend.lucene.exception.LuceneSearchException;
+import com.bhavesh.ragbackend.exception.LuceneSearchException;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -20,17 +18,22 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchService {
+    private static final Logger log = LoggerFactory.getLogger(SearchService.class);
 
     private final LuceneProperties luceneProperties;
     private final Analyzer analyzer;
@@ -40,7 +43,8 @@ public class SearchService {
         Path indexPath = LuceneUtils.resolvePath(luceneProperties,folderId, indexId);
 
         if (!Files.exists(indexPath)) {
-            throw new LuceneIndexException("Index does not exist: " + indexPath);
+            log.warn("Index not found at path: {}", indexPath);
+            throw new LuceneSearchException("Index does not exist: " + indexPath);
         }
 
         try (FSDirectory directory = FSDirectory.open(indexPath); IndexReader reader = DirectoryReader.open(directory)) {

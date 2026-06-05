@@ -1,7 +1,7 @@
-package com.bhavesh.ragbackend.lucene;
+package com.bhavesh.ragbackend.lucene.index;
 
 import com.bhavesh.ragbackend.config.LuceneProperties;
-import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.exception.LuceneIndexException;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;

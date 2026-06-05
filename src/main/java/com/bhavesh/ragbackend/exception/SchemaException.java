@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.lucene.exception;
+package com.bhavesh.ragbackend.exception;
 
 public class SchemaException extends RuntimeException {
     public SchemaException(String message) {

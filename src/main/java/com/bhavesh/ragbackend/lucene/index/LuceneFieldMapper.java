@@ -1,8 +1,8 @@
-package com.bhavesh.ragbackend.lucene;
+package com.bhavesh.ragbackend.lucene.index;
 
-import com.bhavesh.ragbackend.lucene.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.exception.LuceneIndexException;
 import com.bhavesh.ragbackend.model.IndexField;
-import com.bhavesh.ragbackend.lucene.fieldHandler.FieldHandler;
+import com.bhavesh.ragbackend.lucene.index.fieldHandler.FieldHandler;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.index.IndexableField;
 import org.springframework.stereotype.Component;

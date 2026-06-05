@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.lucene.exception;
+package com.bhavesh.ragbackend.exception;
 
 import com.bhavesh.ragbackend.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
