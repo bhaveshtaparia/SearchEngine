@@ -114,7 +114,12 @@ public class IndexingService {
             log.error("Failed to build Lucene document for indexing. folderId={}, indexId={}, error={}", folderId, indexId, ex.getMessage(), ex);
             throw new LuceneIndexException("Failed to build Lucene document for indexing");
         }
+        finally
+        {
+            indexWriterManager.commit(folderId, indexId);
+            indexWriterManager.closeWriter(folderId, indexId);
+        }
         log.info("Document indexed successfully. folderId={}, indexId={}", folderId, indexId);
-        indexWriterManager.commit(folderId, indexId);
+
     }
 }
