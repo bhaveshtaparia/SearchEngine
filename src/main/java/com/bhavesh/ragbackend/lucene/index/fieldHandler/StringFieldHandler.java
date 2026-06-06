@@ -40,7 +40,7 @@ public class StringFieldHandler implements FieldHandler {
         validateValue(fieldName, rawValue);
         warnIfNoOp(fieldName, searchable, stored);
 
-        String value = (String) rawValue;
+        String value =  rawValue.toString();
 
         List<IndexableField> fields = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class StringFieldHandler implements FieldHandler {
             throw new IllegalArgumentException("Field '" + fieldName + "' has a null value. " + "String fields must have a non-null value.");
         }
 
-        if (!(value instanceof String)) {
+        if (!(value instanceof String || value instanceof Boolean)) {
             throw new IllegalArgumentException("Field '" + fieldName + "' expected a String, " + "but got: " + value.getClass().getSimpleName() + " (value: " + value + ").");
         }
     }

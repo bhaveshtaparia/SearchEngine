@@ -1,111 +1,94 @@
 package com.bhavesh.ragbackend.service;
 
 import com.bhavesh.ragbackend.config.LuceneProperties;
-import com.bhavesh.ragbackend.dto.SearchHit;
+import com.bhavesh.ragbackend.dto.FieldDefinition;
 import com.bhavesh.ragbackend.dto.SearchRequest;
 import com.bhavesh.ragbackend.dto.SearchResponse;
 import com.bhavesh.ragbackend.exception.LuceneSearchException;
+import com.bhavesh.ragbackend.lucene.search.IndexSearcherManager;
+import com.bhavesh.ragbackend.lucene.search.QueryBuilder;
+import com.bhavesh.ragbackend.lucene.search.SearchExecutor;
+import com.bhavesh.ragbackend.lucene.search.SearchResultMapper;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.search.highlight.Highlighter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
 public class SearchService {
+
     private static final Logger log = LoggerFactory.getLogger(SearchService.class);
 
     private final LuceneProperties luceneProperties;
-    private final Analyzer analyzer;
+    private final SchemaService schemaService;
+    private final QueryBuilder queryBuilder;
+    private final IndexSearcherManager searcherManager;
+    private final SearchExecutor searchExecutor;
+    private final SearchResultMapper resultMapper;
 
     public SearchResponse search(String folderId, String indexId, SearchRequest request) {
+        long startMs = System.currentTimeMillis();
 
-        Path indexPath = LuceneUtils.resolvePath(luceneProperties,folderId, indexId);
-
+        Path indexPath = LuceneUtils.resolvePath(luceneProperties, folderId, indexId);
         if (!Files.exists(indexPath)) {
-            log.warn("Index not found at path: {}", indexPath);
-            throw new LuceneSearchException("Index does not exist: " + indexPath);
+            log.warn("Search attempted on non-existent index path={}", indexPath);
+            throw new LuceneSearchException(
+                    "Index does not exist for folderId=" + folderId + ", indexId=" + indexId +
+                            ". Index at least one document first."
+            );
         }
 
-        try (FSDirectory directory = FSDirectory.open(indexPath); IndexReader reader = DirectoryReader.open(directory)) {
+        Map<String, FieldDefinition> schema = schemaService.getSchema(folderId, indexId);
 
-            IndexSearcher searcher = new IndexSearcher(reader);
 
-            QueryParser queryParser = new QueryParser("content", analyzer);
-            Query query = queryParser.parse(request.getQuery());
+        Query query = queryBuilder.build(request, schema);
 
-            TopDocs topDocs = searcher.search(query, 10);
+        IndexSearcher searcher = searcherManager.acquire(folderId, indexId);
+        try {
+            TopDocs topDocs = searchExecutor.execute(searcher, query, request);
 
-            List<SearchHit> hits = new ArrayList<>();
+            // Build highlighter only when needed (has CPU cost)
+            Highlighter highlighter = request.isHighlight()
+                    ? searchExecutor.buildHighlighter(query)
+                    : null;
 
-            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            long tookMs = System.currentTimeMillis() - startMs;
 
-                Document document = searcher.storedFields().document(scoreDoc.doc);
+            SearchResponse response = resultMapper.map(
+                    searcher, topDocs, request, schema, highlighter, searchExecutor, tookMs
+            );
 
-                SearchHit hit = new SearchHit();
-
-                hit.setDocumentId(document.get("_documentId"));
-
-                hit.setScore(scoreDoc.score);
-
-                Map<String, Object> fields = new HashMap<>();
-
-                for (IndexableField field : document.getFields()) {
-
-                    String fieldName = field.name();
-
-                    /*
-                     Skip internal system field
-                    */
-                    if ("_documentId".equals(fieldName)) {
-                        continue;
-                    }
-
-                    /*
-                     Avoid duplicate values
-                    */
-                    if (!fields.containsKey(fieldName)) {
-                        fields.put(fieldName, document.get(fieldName));
-                    }
-                }
-
-                hit.setFields(fields);
-
-                hits.add(hit);
-            }
-
-            SearchResponse response = new SearchResponse();
-
-            response.setHits(hits);
+            log.info(
+                    "Search complete folderId={} indexId={} query='{}' total={} took={}ms",
+                    folderId, indexId, request.getQuery(), response.getTotal(), tookMs
+            );
 
             return response;
 
         } catch (IOException e) {
-            log.error("Failed to search index at path: {}", indexPath, e);
-            throw new LuceneSearchException("Failed to search index");
-        } catch (Exception e) {
-            log.error("Search query parsing failed for query: {}", request.getQuery(), e);
-            throw new LuceneSearchException("Search query parsing failed");
+            log.error("IO failure during search. folderId={} indexId={}", folderId, indexId, e);
+            throw new LuceneSearchException("Search failed due to an internal IO error");
+        } finally {
+
+            searcherManager.release(folderId, indexId, searcher);
         }
+    }
+
+    /**
+     * Refresh the searcher after indexing so new documents are visible.
+     */
+    public void refreshIndex(String folderId, String indexId) {
+        searcherManager.maybeRefresh(folderId, indexId);
     }
 }

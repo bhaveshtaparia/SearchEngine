@@ -30,6 +30,7 @@ public class IndexingService {
     private final DocumentBuilder documentBuilder;
     private final IndexWriterManager indexWriterManager;
     private final SchemaService schemaService;
+    private final SearchService searchService;
 
     public void index(String folderId, String indexId, IndexDocumentRequest request) {
             Map<String, List<IndexField>> field = getFields(folderId, indexId, request);
@@ -118,6 +119,7 @@ public class IndexingService {
         {
             indexWriterManager.commit(folderId, indexId);
             indexWriterManager.closeWriter(folderId, indexId);
+            searchService.refreshIndex(folderId,indexId);
         }
         log.info("Document indexed successfully. folderId={}, indexId={}", folderId, indexId);
 

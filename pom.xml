@@ -69,6 +69,12 @@
 			<version>10.4.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-highlighter</artifactId>
+			<version>10.4.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
