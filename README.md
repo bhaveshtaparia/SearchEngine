@@ -39,50 +39,42 @@ Let’s understand some concepts → you can connect the things easily.
 
 
 ## Architecture of the Project
+Out SearchEngine have 3 Different Layer -->
+
+1. Schema.
+2. Indexing. 
+3. Searching
+
+### 1. Schema Layer 
+    **purpose** -> solve the redundancy. no need to define again and again what analyzer, field type, should store etc. and most imp. this information help to do effective searching (like help to apply MultiFieldQueryParser, PhraseQuery etc. based on the field type and analyzer). So basically its help to define the schema of the index.
+      
+      User -> schema Controller -> Shema Service -> Schema Store  --> FileSystem.
+
+     
+
+### 2. Indexing Layer
+    **purpose** --> how to index and where we need to store.
+
+      user --> indexing Controller --> Indexing Service --> index data.
+
+      indexing service --> use Schema store (get the schema information)
+                        --> Indexwriter to update/write the index data.
+                        --> DocumentBuilder to build the docuement.
+      DocumentBuilder --> FieldMapper --> field Handler.
 
 
+## 3. Searching Layer
+    **purpose** --> how to search on the index data and how to return the result.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    HTTP Layer                           │
-│   IndexingController  ←  POST /api/v1/index            │
-│ 
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                  Service Layer                          │
-│   IndexingService                                       │
-│   • orchestrates: build → getWriter → upsert → commit  │
-└──────────┬─────────────────────────┬────────────────────┘
-           │                         │
-┌──────────▼──────────┐   ┌──────────▼──────────────────┐
-│   Document Layer    │   │   Index Writer Layer        │
-│   DocumentBuilder   │   │   IndexWriterManager        │
-│   LuceneFieldMapper │   │   • ConcurrentHashMap cache │
-│                     │   │   • one writer per index    │
-│  ┌──────────────┐   │   │   • @PreDestroy shutdown    │
-│  │FieldHandler  │   │   └─────────────────────────────┘
-│  │  (Strategy)  │   │
-│  ├──────────────┤   │
-│  │ StringField  │   │
-│  │ Handler      │   │
-│  ├──────────────┤   │
-│  │ NumericField │   │
-│  │ Handler      │   │
-│  └──────────────┘   │
-└─────────────────────┘
-           │
-┌──────────▼──────────────────────────────────────────────┐
-│                 Apache Lucene Core                      │
-│   FSDirectory → IndexWriter → Document → Segments       │
-└─────────────────────────────────────────────────────────┘
-           │
-┌──────────▼──────────────────────────────────────────────┐
-│                    Filesystem                          │
-│   indexes/{folderId}/{indexId}/   (Lucene segments)    │
-└─────────────────────────────────────────────────────────┘
-```
+     user --> search Controller --> search Service --> search Result.
+      
+     search service --> use Schema store (get the schema information)
+                            --> SearcherManager to search the index data.
+                            --> QueryBuilder to build the query.
+                            --> SearchExecutor to execute the search and return the result.
+                           --> resultMapper to map the search result in the required format.
+      
+      SearchExecutor       --> Execure the search
+                        --> Highlighter to highlight the search result.
 
-
-
-
+         
