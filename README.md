@@ -29,6 +29,12 @@ Let’s understand some concepts → you can connect the things easily.
    5. Imp concept → lucene create immutable segment from provided docs, for keyword search lucene use inverted index, posting list and many more files , which help to design the effective search algo. (lucene is read heavy storage engine – means give priority to read – based on that its design its algo)
    6. IndexWriter → Manage segments, apply segments merge , analyzer, codec....
 
+### concept help to understand the Search in Lucene
+    1. SearcherManager --> its ensure or help to read the index at a certain point , if new index data was there then how to tackle it ( internally its use ref count. , openifchanges functionality).
+    2. Lucene score (BM25Similarity) --> its default similarity algo in lucene, which is internally used the term frequency , inverse document frequency. For range filter Lucene use KD tree.
+    3. QueryBuilder --> its help to use how we allowed user to search in lucene index. (like we have MultifieldQueryParser, BooleanQuery, PhraseQuery etc.) → so based on the requirement we can use the query builder.
+    4. IndexSearcher --> its help to search the index data, internally it use the segments created by index writer, and apply the query on it and return the result. (so basically its help to search the index data).
+    5. HIghlighter --> highlight the search Result. (user QueryScorer, Formatter, Highlighter, SimpleSpanFragmenter, TokenStream(use same analyzer which we used during indexing) to highlight the search result).
 ---
 
 
