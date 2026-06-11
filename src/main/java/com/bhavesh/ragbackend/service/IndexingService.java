@@ -42,6 +42,37 @@ public class IndexingService {
         indexDocument(folderId, indexId, field);
     }
 
+    public void deleteDocuments(String folderId, String indexId, List<String> documentIds) {
+        if (documentIds == null || documentIds.isEmpty()) {
+            log.warn("No document IDs provided for deletion. folderId={}, indexId={}", folderId, indexId);
+            throw new LuceneIndexException("No Document Id Exits");
+        }
+
+        IndexWriter writer = indexWriterManager.getWriter(folderId, indexId);
+        try {
+            for (String documentId : documentIds) {
+                writer.deleteDocuments(new Term(LuceneUtils.LUCENE_PRIMARY_KEY_FIELD, documentId));
+                log.debug("Queued deletion for documentId={}, folderId={}, indexId={}", documentId, folderId, indexId);
+            }
+        } catch (LuceneIndexException | IllegalArgumentException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Failed to delete Lucene documents. folderId={}, indexId={}, error={}", folderId, indexId, ex.getMessage(), ex);
+            throw new LuceneIndexException("Failed to delete documents from index");
+        } finally {
+            indexWriterManager.commit(folderId, indexId);
+            indexWriterManager.closeWriter(folderId, indexId);
+            searchService.refreshIndex(folderId, indexId);
+        }
+
+        log.info("Deleted {} document(s) successfully. folderId={}, indexId={}", documentIds.size(), folderId, indexId);
+    }
+
+    public void deleteIndex(String folderId, String indexId) {
+        indexWriterManager.deleteIndex(folderId, indexId);
+        log.info("Index deleted successfully. folderId={}, indexId={}", folderId, indexId);
+    }
+
     private Map<String, List<IndexField>> getFields(String folderId, String indexId, IndexDocumentRequest request) {
         Map<String, List<IndexField>> primaryKeyVsIndexFields = new HashMap<>();
         Map<String, Object> fields = request.getFields();

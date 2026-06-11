@@ -2,6 +2,7 @@ package com.bhavesh.ragbackend.lucene.index;
 
 import com.bhavesh.ragbackend.config.LuceneProperties;
 import com.bhavesh.ragbackend.exception.LuceneIndexException;
+import com.bhavesh.ragbackend.service.SearchService;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;
@@ -15,6 +16,7 @@ import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,14 +27,16 @@ public class IndexWriterManager {
             LoggerFactory.getLogger(IndexWriterManager.class);
 
     private final Analyzer analyzer;
+    private final SearchService searchService;
     private final LuceneProperties properties;
 
     private final Map<String, IndexWriter> writerCache =
             new ConcurrentHashMap<>();
 
-    public IndexWriterManager(Analyzer analyzer, LuceneProperties properties) {
+    public IndexWriterManager(Analyzer analyzer, LuceneProperties properties, SearchService searchService) {
         this.analyzer = analyzer;
         this.properties = properties;
+        this.searchService=searchService;
     }
 
     public IndexWriter getWriter(String folderId, String indexId) {
@@ -53,6 +57,35 @@ public class IndexWriterManager {
 
             return createWriter(folderId, indexId);
         });
+    }
+
+    public void deleteIndex(String folderId, String indexId) {
+        IndexWriter writer = getWriter(folderId, indexId);
+        try {
+            writer.deleteAll();
+        } catch (Exception ex) {
+            log.error("Failed to delete index. folderId={}, indexId={}, error={}", folderId, indexId, ex.getMessage(), ex);
+            throw new LuceneIndexException("Failed to delete index");
+        } finally {
+            commit(folderId, indexId);
+            closeWriter(folderId, indexId);
+            searchService.refreshIndex(folderId, indexId);
+        }
+
+        // Wipe the directory completely after writer is closed
+        try {
+            Path indexPath = LuceneUtils.resolvePath(properties, folderId, indexId);
+            Files.walk(indexPath)
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try { Files.delete(path); }
+                        catch (IOException e) { log.warn("Failed to delete path: {}", path, e); }
+                    });
+            log.info("Index directory deleted. folderId={}, indexId={}", folderId, indexId);
+        } catch (IOException ex) {
+            log.error("Failed to delete index directory. folderId={}, indexId={}", folderId, indexId, ex);
+            throw new LuceneIndexException("Failed to delete index directory");
+        }
     }
 
     public void commit(String folderId, String indexId) {
