@@ -183,7 +183,6 @@ public class SearchResultMapper {
             // Only highlight analyzed STRING fields
             if (def.getType() != LuceneUtils.FieldType.STRING) continue;
             if (!Boolean.TRUE.equals(def.getAnalyzed())) continue;
-            if (!Boolean.TRUE.equals(def.getStored())) continue;
 
             if (returnFieldSet != null && !returnFieldSet.contains(fieldName)) continue;
 

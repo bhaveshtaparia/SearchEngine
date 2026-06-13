@@ -33,18 +33,15 @@ public class StringFieldHandler implements FieldHandler {
 
         boolean searchable = indexField.getSearchable();
 
-        boolean stored = indexField.getStored();
-
         boolean analyzed = indexField.getAnalyzed();
 
         validateValue(fieldName, rawValue);
-        warnIfNoOp(fieldName, searchable, stored);
 
         String value =  rawValue.toString();
 
         List<IndexableField> fields = new ArrayList<>();
 
-        Field.Store store = stored ? Field.Store.YES : Field.Store.NO;
+        Field.Store store =Field.Store.YES;
 
         if (searchable) {
 
@@ -60,10 +57,8 @@ public class StringFieldHandler implements FieldHandler {
                 fields.add(new StringField(fieldName, value, store));
             }
 
-        } else if (stored) {
+        } else {
 
-            // Not searchable but stored — value can be retrieved,
-            // but will not appear in search results on its own.
             fields.add(new StoredField(fieldName, value));
         }
 
@@ -82,17 +77,6 @@ public class StringFieldHandler implements FieldHandler {
 
         if (!(value instanceof String || value instanceof Boolean)) {
             throw new IllegalArgumentException("Field '" + fieldName + "' expected a String, " + "but got: " + value.getClass().getSimpleName() + " (value: " + value + ").");
-        }
-    }
-
-    /**
-     * Warns when both flags are false, which would silently produce
-     * an empty field list and drop the value from the index entirely.
-     */
-    private void warnIfNoOp(String fieldName, boolean searchable, boolean stored) {
-
-        if (!searchable && !stored) {
-            log.warn("Field '{}' has searchable=false and stored=false. " + "No Lucene fields will be created — this value will not be indexed.", fieldName);
         }
     }
 }

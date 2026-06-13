@@ -28,11 +28,6 @@ public class IndexField {
     private Boolean searchable = true;
 
     /*
-        default true
-    */
-    private Boolean stored = true;
-
-    /*
         default false
     */
     private Boolean sortable = false;
@@ -51,7 +46,6 @@ public class IndexField {
 
     public void consumeFieldDefinition(FieldDefinition fieldDefinition) {
         this.searchable = fieldDefinition.getSearchable();
-        this.stored = fieldDefinition.getStored();
         this.sortable =  fieldDefinition.getSortable();
         this.analyzed =  fieldDefinition.getAnalyzed();
     }

@@ -18,10 +18,6 @@ public class FieldDefinition {
     */
     private Boolean searchable = true;
 
-    /*
-        default true
-    */
-    private Boolean stored = true;
 
     /*
         default false
