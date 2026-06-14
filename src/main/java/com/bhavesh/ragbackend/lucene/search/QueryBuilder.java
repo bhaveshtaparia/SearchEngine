@@ -1,7 +1,7 @@
 package com.bhavesh.ragbackend.lucene.search;
 
-import com.bhavesh.ragbackend.dto.FieldDefinition;
-import com.bhavesh.ragbackend.dto.SearchRequest;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
+import com.bhavesh.ragbackend.dto.search.SearchRequest;
 import com.bhavesh.ragbackend.exception.LuceneSearchException;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;

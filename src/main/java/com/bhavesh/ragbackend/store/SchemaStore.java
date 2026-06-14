@@ -1,6 +1,6 @@
 package com.bhavesh.ragbackend.store;
 
-import com.bhavesh.ragbackend.dto.FieldDefinition;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
 
 import java.util.List;
 import java.util.Map;

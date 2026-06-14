@@ -1,8 +1,8 @@
 package com.bhavesh.ragbackend.controller;
 
 import com.bhavesh.ragbackend.annotation.ValidId;
-import com.bhavesh.ragbackend.dto.SearchRequest;
-import com.bhavesh.ragbackend.dto.SearchResponse;
+import com.bhavesh.ragbackend.dto.search.SearchRequest;
+import com.bhavesh.ragbackend.dto.search.SearchResponse;
 import com.bhavesh.ragbackend.service.SearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

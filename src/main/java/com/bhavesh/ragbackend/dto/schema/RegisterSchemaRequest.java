@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.dto;
+package com.bhavesh.ragbackend.dto.schema;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

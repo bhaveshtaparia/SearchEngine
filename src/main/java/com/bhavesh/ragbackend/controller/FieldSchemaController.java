@@ -1,10 +1,10 @@
 package com.bhavesh.ragbackend.controller;
 
 import com.bhavesh.ragbackend.annotation.ValidId;
-import com.bhavesh.ragbackend.dto.CreateFolderRequest;
-import com.bhavesh.ragbackend.dto.CreateIndexRequest;
-import com.bhavesh.ragbackend.dto.FieldDefinition;
-import com.bhavesh.ragbackend.dto.RegisterSchemaRequest;
+import com.bhavesh.ragbackend.dto.schema.CreateFolderRequest;
+import com.bhavesh.ragbackend.dto.schema.CreateIndexRequest;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
+import com.bhavesh.ragbackend.dto.schema.RegisterSchemaRequest;
 import com.bhavesh.ragbackend.dto.Response;
 import com.bhavesh.ragbackend.service.SchemaService;
 import jakarta.validation.Valid;

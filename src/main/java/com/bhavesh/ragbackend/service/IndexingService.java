@@ -1,8 +1,8 @@
 package com.bhavesh.ragbackend.service;
 
-import com.bhavesh.ragbackend.dto.BulkIndexRequest;
-import com.bhavesh.ragbackend.dto.FieldDefinition;
-import com.bhavesh.ragbackend.dto.IndexDocumentRequest;
+import com.bhavesh.ragbackend.dto.index.BulkIndexRequest;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
+import com.bhavesh.ragbackend.dto.index.IndexDocumentRequest;
 import com.bhavesh.ragbackend.lucene.index.DocumentBuilder;
 import com.bhavesh.ragbackend.lucene.index.IndexWriterManager;
 import com.bhavesh.ragbackend.exception.LuceneIndexException;

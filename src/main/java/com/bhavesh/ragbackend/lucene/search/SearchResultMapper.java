@@ -1,6 +1,9 @@
 package com.bhavesh.ragbackend.lucene.search;
 
-import com.bhavesh.ragbackend.dto.*;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
+import com.bhavesh.ragbackend.dto.search.SearchHit;
+import com.bhavesh.ragbackend.dto.search.SearchRequest;
+import com.bhavesh.ragbackend.dto.search.SearchResponse;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;

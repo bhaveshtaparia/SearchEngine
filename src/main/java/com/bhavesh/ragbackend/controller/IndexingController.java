@@ -1,8 +1,8 @@
 package com.bhavesh.ragbackend.controller;
 
 import com.bhavesh.ragbackend.annotation.ValidId;
-import com.bhavesh.ragbackend.dto.BulkIndexRequest;
-import com.bhavesh.ragbackend.dto.IndexDocumentRequest;
+import com.bhavesh.ragbackend.dto.index.BulkIndexRequest;
+import com.bhavesh.ragbackend.dto.index.IndexDocumentRequest;
 import com.bhavesh.ragbackend.dto.Response;
 import com.bhavesh.ragbackend.service.IndexingService;
 import jakarta.validation.Valid;

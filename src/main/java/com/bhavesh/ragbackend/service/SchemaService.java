@@ -1,9 +1,9 @@
 package com.bhavesh.ragbackend.service;
 
-import com.bhavesh.ragbackend.dto.CreateFolderRequest;
-import com.bhavesh.ragbackend.dto.CreateIndexRequest;
-import com.bhavesh.ragbackend.dto.FieldDefinition;
-import com.bhavesh.ragbackend.dto.RegisterSchemaRequest;
+import com.bhavesh.ragbackend.dto.schema.CreateFolderRequest;
+import com.bhavesh.ragbackend.dto.schema.CreateIndexRequest;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
+import com.bhavesh.ragbackend.dto.schema.RegisterSchemaRequest;
 import com.bhavesh.ragbackend.exception.SchemaException;
 import com.bhavesh.ragbackend.store.SchemaStore;
 import com.bhavesh.ragbackend.utils.LuceneUtils;

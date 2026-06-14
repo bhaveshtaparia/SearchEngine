@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.dto;
+package com.bhavesh.ragbackend.dto.schema;
 
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import jakarta.validation.constraints.NotNull;

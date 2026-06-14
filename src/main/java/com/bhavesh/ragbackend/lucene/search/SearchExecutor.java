@@ -1,6 +1,6 @@
 package com.bhavesh.ragbackend.lucene.search;
 
-import com.bhavesh.ragbackend.dto.SearchRequest;
+import com.bhavesh.ragbackend.dto.search.SearchRequest;
 import com.bhavesh.ragbackend.exception.LuceneSearchException;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;

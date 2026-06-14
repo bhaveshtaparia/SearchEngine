@@ -1,4 +1,4 @@
-package com.bhavesh.ragbackend.dto;
+package com.bhavesh.ragbackend.dto.search;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

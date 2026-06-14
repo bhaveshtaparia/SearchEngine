@@ -1,7 +1,7 @@
 package com.bhavesh.ragbackend.model;
 
 
-import com.bhavesh.ragbackend.dto.FieldDefinition;
+import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
 import com.bhavesh.ragbackend.utils.LuceneUtils;
 import lombok.Data;
 
