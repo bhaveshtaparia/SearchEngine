@@ -1,5 +1,7 @@
 package com.bhavesh.ragbackend.service;
 
+import com.bhavesh.ragbackend.dto.CreateFolderRequest;
+import com.bhavesh.ragbackend.dto.CreateIndexRequest;
 import com.bhavesh.ragbackend.dto.FieldDefinition;
 import com.bhavesh.ragbackend.dto.RegisterSchemaRequest;
 import com.bhavesh.ragbackend.exception.SchemaException;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,7 +25,7 @@ public class SchemaService {
         Map<String, FieldDefinition> schema = request.getFields();
         validatePrimaryKeyField(schema);
         validateSchemaFieldNames(schema);
-        if(schemaStore.exists(folderId, indexId)) {
+        if(schemaStore.hasSchema(folderId, indexId)) {
             log.warn("Schema already exits for folderId={}, indexId={}", folderId, indexId);
             throw new SchemaException("Schema already exists for folderId=" + folderId + " and indexId=" + indexId);
         }
@@ -31,6 +34,22 @@ public class SchemaService {
 
     public Map<String, FieldDefinition>  getSchema(String folderId, String indexId) {
         return schemaStore.load(folderId, indexId);
+    }
+
+    public void createFolder(CreateFolderRequest request){
+             schemaStore.createFolder(request.name());
+    }
+
+    public void createIndex(String folderId, CreateIndexRequest request){
+                schemaStore.createIndex(folderId,request.name());
+    }
+
+    public List<String> getFolders(){
+        return schemaStore.getFolders();
+    }
+
+    public List<String> getIndexes(String folderId){
+        return schemaStore.getIndexes(folderId);
     }
 
     private void validatePrimaryKeyField(Map<String, FieldDefinition> schema) {
@@ -57,6 +76,4 @@ public class SchemaService {
             }
         }
     }
-
-
 }

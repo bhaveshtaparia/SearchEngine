@@ -11,6 +11,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -23,21 +24,120 @@ public class FileSchemaStore implements SchemaStore {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void save(String folderId, String indexId, Map<String, FieldDefinition> schema) {
-        try {
+    public void createFolder(String folderId) {
+        Path folder = resolveFolder(folderId);
 
+        try {
+            if (Files.exists(folder)) {
+                log.warn("Folder id already exits for folder {}",folderId);
+                throw new SchemaException("Folder with this name already exits");
+            }
+
+            Files.createDirectories(folder);
+        }
+        catch (SchemaException ex){
+            throw ex;
+        }
+        catch (Exception ex){
+            log.error("Error creating a Folder {}",folder,ex);
+            throw new SchemaException("Something went wrong while creating a Folder");
+        }
+    }
+
+    @Override
+    public List<String> getFolders() {
+        try {
+            if (!Files.exists(ROOT_PATH)) {
+                return List.of();
+            }
+
+            try (var paths = Files.list(ROOT_PATH)) {
+                return paths
+                        .filter(Files::isDirectory)
+                        .map(path -> path.getFileName().toString())
+                        .toList();
+            }
+        } catch (Exception ex) {
+            log.error("Error fetching folders", ex);
+            throw new SchemaException("Something went wrong while fetching folders");
+        }
+    }
+
+    @Override
+    public void createIndex(String folderId, String indexId) {
+        try {
             Path folder = resolveFolder(folderId);
 
             if (!Files.exists(folder)) {
-                Files.createDirectories(folder);
+                log.warn("Folder does not exist for folderId {}", folderId);
+                throw new SchemaException("Folder does not exist");
+            }
+
+            if (placeExists(folderId, indexId)) {
+                log.warn("Index already exists for indexId {}", indexId);
+                throw new SchemaException("Index already exists");
+            }
+
+            Files.createFile(resolveSchemaFile(folderId, indexId));
+
+        } catch (SchemaException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error creating index {}", indexId, ex);
+            throw new SchemaException("Something went wrong while creating index");
+        }
+    }
+
+    @Override
+    public List<String> getIndexes(String folderId) {
+        try {
+            Path folder = resolveFolder(folderId);
+
+            if (!Files.exists(folder)) {
+                return List.of();
+            }
+
+            try (var paths = Files.list(folder)) {
+                return paths
+                        .filter(Files::isRegularFile)
+                        .map(path -> path.getFileName().toString())
+                        .filter(name -> name.endsWith("-schema.json"))
+                        .map(name -> name.substring(
+                                0,
+                                name.length() - "-schema.json".length()
+                        ))
+                        .toList();
+            }
+        } catch (Exception ex) {
+            log.error("Error fetching indexes for folder {}", folderId, ex);
+            throw new SchemaException("Something went wrong while fetching indexes");
+        }
+    }
+
+    @Override
+    public void save(String folderId, String indexId, Map<String, FieldDefinition> schema) {
+
+        Path folder = resolveFolder(folderId);
+        Path schemaFile = resolveSchemaFile(folderId, indexId);
+
+        try {
+            if (!Files.exists(folder)) {
+                throw new SchemaException("Folder does not exist");
+            }
+
+            if (!Files.exists(schemaFile)) {
+                throw new SchemaException("Index does not exist");
             }
 
             objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(resolveSchemaFile(folderId, indexId).toFile(), schema);
+                    .writeValue(schemaFile.toFile(), schema);
 
-        }
-        catch (Exception e) {
-            log.error("Error saving schema for folderId={}, indexId={}", folderId, indexId, e);
+        } catch (SchemaException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error saving schema for folderId={}, indexId={}",
+                    folderId, indexId, ex);
+
             throw new SchemaException("Something went wrong while saving schema");
         }
     }
@@ -51,6 +151,10 @@ public class FileSchemaStore implements SchemaStore {
         }
 
         try {
+
+            if (Files.size(schemaFile) == 0) {
+                return Map.of();
+            }
             return objectMapper.readValue(
                     schemaFile.toFile(),
                     objectMapper.getTypeFactory()
@@ -63,11 +167,11 @@ public class FileSchemaStore implements SchemaStore {
     }
 
     @Override
-    public boolean exists(String folderId, String indexId) {
-        return Files.exists(resolveSchemaFile(folderId, indexId));
+    public boolean hasSchema(String folderId, String indexId) {
+        Map<String, FieldDefinition> schema = load(folderId, indexId);
+        return schema != null && !schema.isEmpty();
     }
 
-    // ── private helpers ───────────────────────────────────────────
 
     private Path resolveFolder(String folderId) {
         return ROOT_PATH.resolve(folderId);
@@ -76,5 +180,11 @@ public class FileSchemaStore implements SchemaStore {
     private Path resolveSchemaFile(String folderId, String indexId) {
         return resolveFolder(folderId).resolve(indexId + "-schema.json");
     }
+
+
+    private boolean placeExists(String folderId, String indexId) {
+        return Files.exists(resolveSchemaFile(folderId, indexId));
+    }
+
 
 }
