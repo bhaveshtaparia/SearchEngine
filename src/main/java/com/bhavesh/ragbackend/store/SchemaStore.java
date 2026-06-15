@@ -20,4 +20,8 @@ public interface SchemaStore {
     Map<String, FieldDefinition> load(String folderId, String indexId);
 
     boolean hasSchema(String folderId, String indexId);
+
+    void deleteFolder(String folderId);
+
+    void deleteIndex(String folderId,String indexId);
 }

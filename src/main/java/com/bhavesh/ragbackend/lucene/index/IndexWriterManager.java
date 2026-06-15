@@ -60,30 +60,52 @@ public class IndexWriterManager {
     }
 
     public void deleteIndex(String folderId, String indexId) {
-        IndexWriter writer = getWriter(folderId, indexId);
+
+        // 1. Safe cleanup of in-memory search resources
         try {
-            writer.deleteAll();
-        } catch (Exception ex) {
-            log.error("Failed to delete index. folderId={}, indexId={}, error={}", folderId, indexId, ex.getMessage(), ex);
-            throw new LuceneIndexException("Failed to delete index");
-        } finally {
-            commit(folderId, indexId);
-            closeWriter(folderId, indexId);
-            searchService.refreshIndex(folderId, indexId);
+            searchService.removeIndex(folderId, indexId);
+        } catch (Exception e) {
+            log.warn("Searcher not found or already removed. folderId={}, indexId={}",
+                    folderId, indexId);
         }
 
-        // Wipe the directory completely after writer is closed
+        // 2. Safe writer close
         try {
-            Path indexPath = LuceneUtils.resolvePath(properties, folderId, indexId);
+            closeWriter(folderId, indexId);
+        } catch (Exception e) {
+            log.warn("Writer not found or already closed. folderId={}, indexId={}",
+                    folderId, indexId);
+        }
+
+        // 3. Resolve path
+        Path indexPath = LuceneUtils.resolvePath(properties, folderId, indexId);
+
+        // 4. If directory doesn't exist → just return (important)
+        if (!Files.exists(indexPath)) {
+            log.info("Index directory already missing. folderId={}, indexId={}",
+                    folderId, indexId);
+            return;
+        }
+
+        // 5. Delete directory safely
+        try {
             Files.walk(indexPath)
                     .sorted(Comparator.reverseOrder())
                     .forEach(path -> {
-                        try { Files.delete(path); }
-                        catch (IOException e) { log.warn("Failed to delete path: {}", path, e); }
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException e) {
+                            log.warn("Failed to delete path: {}", path, e);
+                        }
                     });
-            log.info("Index directory deleted. folderId={}, indexId={}", folderId, indexId);
+
+            log.info("Index directory deleted. folderId={}, indexId={}",
+                    folderId, indexId);
+
         } catch (IOException ex) {
-            log.error("Failed to delete index directory. folderId={}, indexId={}", folderId, indexId, ex);
+            log.error("Failed to delete index directory. folderId={}, indexId={}",
+                    folderId, indexId, ex);
+
             throw new LuceneIndexException("Failed to delete index directory");
         }
     }

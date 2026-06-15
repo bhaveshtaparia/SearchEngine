@@ -91,4 +91,8 @@ public class SearchService {
     public void refreshIndex(String folderId, String indexId) {
         searcherManager.maybeRefresh(folderId, indexId);
     }
+
+    public void removeIndex(String folderId, String indexId) {
+        searcherManager.evict(folderId, indexId);
+    }
 }

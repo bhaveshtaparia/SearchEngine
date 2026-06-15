@@ -6,11 +6,14 @@ import com.bhavesh.ragbackend.dto.schema.CreateIndexRequest;
 import com.bhavesh.ragbackend.dto.schema.FieldDefinition;
 import com.bhavesh.ragbackend.dto.schema.RegisterSchemaRequest;
 import com.bhavesh.ragbackend.dto.Response;
+import com.bhavesh.ragbackend.service.IndexLifecycleService;
 import com.bhavesh.ragbackend.service.SchemaService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/folders")
+@RequestMapping("/api/v1/schema/folders")
 @RequiredArgsConstructor
 @Validated
 public class FieldSchemaController {
 
     private final SchemaService schemaService;
+    private final IndexLifecycleService indexLifecycleService;
 
     @PostMapping
     public ResponseEntity<Response> createFolder(@Valid @RequestBody CreateFolderRequest request) {
@@ -45,6 +49,20 @@ public class FieldSchemaController {
         }
 
         return ResponseEntity.ok(folder);
+    }
+
+    @DeleteMapping("/{folderId}")
+    public ResponseEntity<Response> deleteFolder(
+            @PathVariable @ValidId @NotNull String folderId) {
+
+        indexLifecycleService.deleteFolder(folderId);
+
+        return ResponseEntity.ok(
+                new Response(
+                        "Folder deleted successfully",
+                        Response.ResponseType.SUCCESS
+                )
+        );
     }
 
 
@@ -67,8 +85,23 @@ public class FieldSchemaController {
         return ResponseEntity.ok(index);
     }
 
+    @DeleteMapping("/{folderId}/indexes/{indexId}")
+    public ResponseEntity<Response> deleteSchemaIndex(
+            @PathVariable @ValidId @NotNull String folderId,
+            @PathVariable @ValidId @NotNull String indexId) {
 
-    @PostMapping("/{folderId}/indexes/{indexId}/schema")
+        indexLifecycleService.deleteIndex(folderId, indexId);
+
+        return ResponseEntity.ok(
+                new Response(
+                        "Index deleted successfully",
+                        Response.ResponseType.SUCCESS
+                )
+        );
+    }
+
+
+    @PostMapping("/{folderId}/indexes/{indexId}")
     public ResponseEntity<Response> registerSchema(@PathVariable @ValidId String folderId,
                                                    @PathVariable @ValidId String indexId,
                                                    @Valid @RequestBody RegisterSchemaRequest request) {
@@ -76,7 +109,7 @@ public class FieldSchemaController {
         return ResponseEntity.ok(new Response("Schema registered successfully", Response.ResponseType.SUCCESS));
     }
 
-    @GetMapping("/{folderId}/indexes/{indexId}/schema")
+    @GetMapping("/{folderId}/indexes/{indexId}")
     public ResponseEntity<?> getSchema(@PathVariable @ValidId String folderId,
                                        @PathVariable @ValidId String indexId) {
         Map<String, FieldDefinition> schema = schemaService.getSchema(folderId, indexId);

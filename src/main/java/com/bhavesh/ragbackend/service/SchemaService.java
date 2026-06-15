@@ -52,6 +52,14 @@ public class SchemaService {
         return schemaStore.getIndexes(folderId);
     }
 
+    public void deleteIndex(String folderId, String indexId){
+        schemaStore.deleteIndex(folderId,indexId);
+    }
+
+    public void deleteFolder(String folderId){
+        schemaStore.deleteFolder(folderId);
+    }
+
     private void validatePrimaryKeyField(Map<String, FieldDefinition> schema) {
         String primaryKeyField = null;
         for (var entry : schema.entrySet()) {

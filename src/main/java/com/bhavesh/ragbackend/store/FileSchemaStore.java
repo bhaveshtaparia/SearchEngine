@@ -172,6 +172,62 @@ public class FileSchemaStore implements SchemaStore {
         return schema != null && !schema.isEmpty();
     }
 
+    @Override
+    public void deleteFolder(String folderId) {
+        Path folder = resolveFolder(folderId);
+
+        try {
+            if (!Files.exists(folder)) {
+                throw new SchemaException("Folder doesn't exists");
+            }
+
+            Files.walk(folder)
+                    .sorted(java.util.Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+        }catch (SchemaException ex){
+            throw ex;
+        }
+        catch (Exception ex) {
+            log.error("Error deleting folder {}", folderId, ex);
+            throw new SchemaException(
+                    "Something went wrong while deleting folder");
+        }
+    }
+
+    @Override
+    public void deleteIndex(String folderId, String indexId) {
+        Path schemaFile = resolveSchemaFile(folderId, indexId);
+
+        try {
+            if (!Files.exists(schemaFile)) {
+                throw new SchemaException("Index doesn't exits");
+            }
+
+            Files.delete(schemaFile);
+
+        }catch (SchemaException ex){
+            throw ex;
+        }
+        catch (Exception ex) {
+            log.error(
+                    "Error deleting schema for folderId={}, indexId={}",
+                    folderId,
+                    indexId,
+                    ex
+            );
+
+            throw new SchemaException(
+                    "Something went wrong while deleting index schema");
+        }
+    }
+
 
     private Path resolveFolder(String folderId) {
         return ROOT_PATH.resolve(folderId);
